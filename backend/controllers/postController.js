@@ -27,8 +27,11 @@ exports.createPost = async (req, res) => {
   try {
     const { title, content } = req.body;
     const author = req.user.username;
-    // 💡 업로드된 파일이 있으면 경로 저장, 없으면 null
-    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+    // 💡 S3 사용 여부에 따라 이미지 경로 결정
+    let image_url = null;
+    if (req.file) {
+      image_url = process.env.USE_S3 === 'true' ? req.file.location : `/uploads/${req.file.filename}`;
+    }
 
     const [result] = await db.query(
       'INSERT INTO posts (title, content, author, image_url) VALUES (?, ?, ?, ?)',
@@ -54,7 +57,7 @@ exports.updatePost = async (req, res) => {
     // 새 이미지가 업로드되면 교체, 아니면 기존 이미지 유지
     let image_url = posts[0].image_url;
     if (req.file) {
-      image_url = `/uploads/${req.file.filename}`;
+      image_url = process.env.USE_S3 === 'true' ? req.file.location : `/uploads/${req.file.filename}`;
     }
 
     await db.query(

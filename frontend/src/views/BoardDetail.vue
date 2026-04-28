@@ -18,7 +18,7 @@
       <div class="article-content">
         <!-- 💡 동적 baseURL 사용 -->
         <div v-if="post.image_url" class="post-image">
-          <img :src="`${baseURL}${post.image_url}`" alt="Post Intel" />
+          <img :src="post.image_url.startsWith('http') ? post.image_url : `${baseURL}${post.image_url}`" alt="Post Intel" />
         </div>
         {{ post.content }}
       </div>

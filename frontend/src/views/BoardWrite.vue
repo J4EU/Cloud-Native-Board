@@ -18,7 +18,7 @@
           <div class="file-upload-wrapper">
             <input type="file" @change="handleFileChange" accept="image/*" class="f1-file-input">
             <div v-if="imagePreview || form.image_url" class="image-preview">
-              <img :src="imagePreview || `http://localhost:3000${form.image_url}`" alt="Preview">
+              <img :src="imagePreview || (form.image_url.startsWith('http') ? form.image_url : `${baseURL}${form.image_url}`)" alt="Preview">
               <button type="button" @click="removeImage" class="btn-remove-img">REMOVE</button>
             </div>
           </div>
@@ -41,7 +41,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api from '../api';
+import api, { baseURL } from '../api';
 import { store } from '../store';
 
 const route = useRoute();

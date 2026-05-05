@@ -8,14 +8,14 @@ F1 게시판 애플리케이션을 대상으로, 단일 EC2 배포부터 고가�
 
 - [x] Vue 3 + Vite 기반 Frontend 구조 파악
 - [x] Node.js / Express Backend 구조 파악
-- [ ] Local Docker Compose 실행
+- [x] Local Docker Compose 실행
 
 ---
 
 ### v1. Single EC2 Deployment
 
-- [ ] Single EC2 배포
-- [ ] Docker Compose 기반 서비스 실행
+- [x] Single EC2 배포
+- [x] Docker Compose 기반 서비스 실행
 - [ ] Nginx Reverse Proxy 구성
 
 ### v2. Managed Database Separation

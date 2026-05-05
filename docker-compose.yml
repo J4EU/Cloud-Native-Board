@@ -1,0 +1,38 @@
+# version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: f1-frontend
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+  backend:
+    build: ./backend
+    container_name: f1-backend
+    ports:
+      - 3000:3000
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=f1user
+      - DB_PASSWORD=ahzk2803!!
+      - DB_NAME=f1db
+      - JWT_SECRET=dev-secret-key
+    depends_on:
+      - db
+  db:
+    image: mariadb:latest
+    container_name: f1-db
+    ports:
+      - 3306:3306
+    environment:
+      - MARIADB_ROOT_PASSWORD=ahzk2803!!
+      - MARIADB_DATABASE=f1db
+      - MARIADB_USER=f1user
+      - MARIADB_PASSWORD=ahzk2803!!
+    volumes:
+      - f1-db-data:/var/lib/mysql
+volumes:
+  f1-db-data:

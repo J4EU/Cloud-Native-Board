@@ -16,7 +16,7 @@ F1 게시판 애플리케이션을 대상으로, 단일 EC2 배포부터 고가�
 
 - [x] Single EC2 배포
 - [x] Docker Compose 기반 서비스 실행
-- [ ] Nginx Reverse Proxy 구성
+- [x] Nginx Reverse Proxy 구성
 
 ### v2. Managed Database Separation
 

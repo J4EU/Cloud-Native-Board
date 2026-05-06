@@ -10,8 +10,9 @@ services:
   backend:
     build: ./backend
     container_name: f1-backend
-    ports:
-      - "3000:3000"
+    # ports 속성을 제거하고 expose 속성을 사용해서 컨테이너 내부 통신만 가능하도록 수정
+    expose:
+      - "3000"
     environment:
       DB_HOST: db
       DB_PORT: "3306"

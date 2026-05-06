@@ -20,6 +20,7 @@ FROM nginx:stable-alpine
 
 # 빌드 스테이지에서 생성된 빌드 결과물을 Nginx 컨테이너에 복사
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 포트 설정
 EXPOSE 80

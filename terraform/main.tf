@@ -64,22 +64,21 @@ resource "aws_security_group_rule" "ingress" {
   security_group_id = aws_security_group.this.id
 }
 
-resource "aws_security_group_rule" "ingress-ssh" {
+resource "aws_security_group_rule" "ingress-ssh-house" {
   type              = "ingress"
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = [var.my_ip]
+  cidr_blocks       = [var.my_house_ip]
   security_group_id = aws_security_group.this.id
 }
 
-# 리버스 프록시 사용하기 전 임시 조치
-resource "aws_security_group_rule" "ingress-3000" {
+resource "aws_security_group_rule" "ingress-ssh-office" {
   type              = "ingress"
-  from_port         = 3000
-  to_port           = 3000
+  from_port         = 22
+  to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
+  cidr_blocks       = [var.my_office_ip]
   security_group_id = aws_security_group.this.id
 }
 

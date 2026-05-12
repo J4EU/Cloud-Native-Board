@@ -1,14 +1,14 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Vite 환경변수에서 API 주소를 가져옴 (없으면 기본값 사용)
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const baseURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
-  baseURL: `${baseURL}/api`,
+  baseURL: `${baseURL}`,
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -18,14 +18,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginRequest = error.config.url.includes('/auth/login');
+    const isLoginRequest = error.config.url.includes("/auth/login");
     if (error.response?.status === 401 && !isLoginRequest) {
-      alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
       localStorage.clear();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

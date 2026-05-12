@@ -9,56 +9,81 @@
       <form @submit.prevent="handleSignup" class="f1-form">
         <div class="form-group">
           <label>CHOOSE USERNAME</label>
-          <input v-model="form.username" type="text" class="f1-input" placeholder="USERNAME" required>
+          <input
+            v-model="form.username"
+            type="text"
+            class="f1-input"
+            placeholder="USERNAME"
+            required
+          />
         </div>
         <div class="form-group">
           <label>EMAIL ADDRESS</label>
-          <input v-model="form.email" type="email" class="f1-input" placeholder="EMAIL@EXAMPLE.COM" required>
+          <input
+            v-model="form.email"
+            type="email"
+            class="f1-input"
+            placeholder="EMAIL@EXAMPLE.COM"
+            required
+          />
         </div>
         <div class="form-group">
           <label>PASSWORD</label>
-          <input v-model="form.password" type="password" class="f1-input" placeholder="SECURE PASSWORD" required>
+          <input
+            v-model="form.password"
+            type="password"
+            class="f1-input"
+            placeholder="SECURE PASSWORD"
+            required
+          />
         </div>
         <div class="form-group">
           <label>CONFIRM PASSWORD</label>
-          <input v-model="passwordConfirm" type="password" class="f1-input" placeholder="REPEAT PASSWORD" required>
+          <input
+            v-model="passwordConfirm"
+            type="password"
+            class="f1-input"
+            placeholder="REPEAT PASSWORD"
+            required
+          />
         </div>
-        
+
         <button type="submit" class="btn-f1-red">CREATE ACCOUNT</button>
       </form>
 
       <p class="auth-footer">
-        ALREADY REGISTERED? <router-link to="/login">BACK TO PIT WALL</router-link>
+        ALREADY REGISTERED?
+        <router-link to="/login">BACK TO PIT WALL</router-link>
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '../api';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import api from "../api";
 
 const router = useRouter();
-const passwordConfirm = ref('');
+const passwordConfirm = ref("");
 const form = ref({
-  username: '',
-  email: '',
-  password: ''
+  username: "",
+  email: "",
+  password: "",
 });
 
 const handleSignup = async () => {
   if (form.value.password !== passwordConfirm.value) {
-    alert('비밀번호가 서로 일치하지 않습니다.');
+    alert("비밀번호가 서로 일치하지 않습니다.");
     return;
   }
 
   try {
-    await api.post('/auth/signup', form.value);
-    alert('회원가입이 완료되었습니다. 패독에 오신 것을 환영합니다!');
-    router.push('/login');
+    await api.post("/auth/signup", form.value);
+    alert("회원가입이 완료되었습니다. 패독에 오신 것을 환영합니다!");
+    router.push("/login");
   } catch (error) {
-    alert(error.response?.data?.message || '회원가입 중 에러가 발생했습니다.');
+    alert(error.response?.data?.message || "회원가입 중 에러가 발생했습니다.");
   }
 };
 </script>

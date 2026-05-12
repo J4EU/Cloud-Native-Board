@@ -2,28 +2,40 @@
   <div id="app">
     <!-- F1 상단 레드 바 -->
     <div class="f1-top-line"></div>
-    
+
     <nav class="f1-nav">
       <div class="nav-content">
         <router-link to="/" class="nav-logo">
-          <span class="f1-logo-text">F1</span> <span class="board-text">PADDOCK</span>
+          <span class="f1-logo-text">F1</span>
+          <span class="board-text">PADDOCK</span>
         </router-link>
-        
+
         <div class="nav-links">
           <router-link to="/" class="nav-item">THE CHATTER</router-link>
-          
+
           <!-- 관리자 전용 메뉴 -->
-          <router-link v-if="store.user?.role === 'admin'" to="/admin" class="nav-item admin-link">ADMIN PANEL</router-link>
-          
+          <router-link
+            v-if="store.user?.role === 'admin'"
+            to="/admin"
+            class="nav-item admin-link"
+            >ADMIN PANEL</router-link
+          >
+
           <template v-if="!store.user">
             <router-link to="/login" class="nav-item">SIGN IN</router-link>
-            <router-link to="/signup" class="btn-signup-f1">JOIN PADDOCK</router-link>
+            <router-link to="/signup" class="btn-signup-f1"
+              >JOIN PADDOCK</router-link
+            >
           </template>
-          
+
           <template v-else>
             <router-link to="/mypage" class="user-info">
-              <span class="user-rank">{{ store.user.role === 'admin' ? 'ADM' : 'DRV' }}</span>
-              <span class="username">{{ store.user.username.toUpperCase() }}</span>
+              <span class="user-rank">{{
+                store.user.role === "admin" ? "ADM" : "DRV"
+              }}</span>
+              <span class="username">{{
+                store.user.username.toUpperCase()
+              }}</span>
             </router-link>
             <button @click="handleLogout" class="btn-logout">EXIT</button>
           </template>
@@ -38,15 +50,15 @@
 </template>
 
 <script setup>
-import { store } from './store';
-import { useRouter } from 'vue-router';
+import { store } from "./store";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 
 const handleLogout = () => {
-  if (confirm('패독을 떠나시겠습니까?')) {
+  if (confirm("패독을 떠나시겠습니까?")) {
     store.logout();
-    router.push('/login');
+    router.push("/login");
   }
 };
 </script>
@@ -99,19 +111,23 @@ const handleLogout = () => {
   font-style: italic;
 }
 
-.nav-links { display: flex; align-items: center; gap: 25px; }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
 
-.nav-item { 
+.nav-item {
   color: var(--f1-white);
-  text-decoration: none; 
-  font-weight: 800; 
+  text-decoration: none;
+  font-weight: 800;
   font-size: 14px;
   letter-spacing: 1px;
   transition: color 0.2s;
   padding-bottom: 4px;
   border-bottom: 2px solid transparent;
 }
-.nav-item:hover { 
+.nav-item:hover {
   color: var(--f1-red);
   border-bottom-color: var(--f1-red);
 }
@@ -160,7 +176,7 @@ const handleLogout = () => {
   transition: all 0.2s;
   font-style: italic;
 }
-.btn-logout:hover { 
+.btn-logout:hover {
   background-color: #f04452;
   color: white;
   border-color: #f04452;

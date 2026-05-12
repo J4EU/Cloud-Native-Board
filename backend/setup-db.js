@@ -1,8 +1,8 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+const mysql = require("mysql2/promise");
+require("dotenv").config();
 
 const config = {
-  host: process.env.DB_HOST, 
+  host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
 };
@@ -10,7 +10,9 @@ const config = {
 async function setup() {
   try {
     const connection = await mysql.createConnection(config);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME};`);
+    await connection.query(
+      `CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME};`,
+    );
     await connection.query(`USE ${process.env.DB_NAME};`);
 
     // 1. 게시글 테이블 생성 (image_url 컬럼 포함)
@@ -38,11 +40,16 @@ async function setup() {
         PRIMARY KEY (id)
       );
     `);
-    
+
     // role 컬럼 migration
     try {
-      const [cols] = await connection.query(`SHOW COLUMNS FROM users LIKE 'role'`);
-      if (cols.length === 0) await connection.query(`ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user' AFTER email`);
+      const [cols] = await connection.query(
+        `SHOW COLUMNS FROM users LIKE 'role'`,
+      );
+      if (cols.length === 0)
+        await connection.query(
+          `ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user' AFTER email`,
+        );
     } catch (err) {}
 
     await connection.query(`
@@ -57,10 +64,10 @@ async function setup() {
       );
     `);
 
-    console.log('✅ 모든 DB 설정이 완료되었습니다.');
+    console.log("✅ 모든 DB 설정이 완료되었습니다.");
     await connection.end();
   } catch (err) {
-    console.error('❌ 설정 중 에러 발생:', err.message);
+    console.error("❌ 설정 중 에러 발생:", err.message);
   }
 }
 

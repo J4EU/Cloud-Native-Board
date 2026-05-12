@@ -9,43 +9,59 @@
       <form @submit.prevent="handleLogin" class="f1-form">
         <div class="form-group">
           <label>ID / USERNAME</label>
-          <input v-model="form.username" type="text" class="f1-input" placeholder="USERNAME" required>
+          <input
+            v-model="form.username"
+            type="text"
+            class="f1-input"
+            placeholder="USERNAME"
+            required
+          />
         </div>
         <div class="form-group">
           <label>SECURITY PASSWORD</label>
-          <input v-model="form.password" type="password" class="f1-input" placeholder="PASSWORD" required>
+          <input
+            v-model="form.password"
+            type="password"
+            class="f1-input"
+            placeholder="PASSWORD"
+            required
+          />
         </div>
-        
+
         <button type="submit" class="btn-f1-red">AUTHENTICATE</button>
       </form>
 
       <p class="auth-footer">
-        NEW TO THE TRACK? <router-link to="/signup">JOIN THE PADDOCK</router-link>
+        NEW TO THE TRACK?
+        <router-link to="/signup">JOIN THE PADDOCK</router-link>
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '../api';
-import { store } from '../store';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import api from "../api";
+import { store } from "../store";
 
 const router = useRouter();
 const form = ref({
-  username: '',
-  password: ''
+  username: "",
+  password: "",
 });
 
 const handleLogin = async () => {
   try {
-    const response = await api.post('/auth/login', form.value);
-    localStorage.setItem('token', response.data.token);
+    const response = await api.post("/auth/login", form.value);
+    localStorage.setItem("token", response.data.token);
     store.setUser(response.data.user);
-    router.push('/');
+    router.push("/");
   } catch (error) {
-    alert(error.response?.data?.message || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+    alert(
+      error.response?.data?.message ||
+        "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.",
+    );
   }
 };
 </script>

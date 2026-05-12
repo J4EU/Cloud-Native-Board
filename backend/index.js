@@ -29,7 +29,7 @@ app.use(
 app.use(express.json());
 
 // 업로드된 파일 접근 허용
-app.use("/uploads", express.static("uploads"));
+app.use("/api/uploads", express.static("uploads"));
 
 // 2. 라우터 연결
 app.use("/api/posts", postRoutes);

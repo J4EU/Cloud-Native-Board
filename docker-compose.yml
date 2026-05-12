@@ -2,15 +2,12 @@ services:
   frontend:
     build: ./frontend
     container_name: f1-frontend
-    ports:
-      - "80:80"
     depends_on:
       - backend
 
   backend:
     build: ./backend
     container_name: f1-backend
-    # ports 속성을 제거하고 expose 속성을 사용해서 컨테이너 내부 통신만 가능하도록 수정
     expose:
       - "3000"
     environment:
@@ -26,8 +23,6 @@ services:
   db:
     image: mariadb:latest
     container_name: f1-db
-    ports:
-      - 127.0.0.1:3307:3306
     expose:
       - "3306"
     environment:
@@ -37,5 +32,6 @@ services:
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
       - f1-db-data:/var/lib/mysql
+
 volumes:
   f1-db-data:

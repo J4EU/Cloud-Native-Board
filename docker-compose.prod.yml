@@ -1,0 +1,10 @@
+services:
+  frontend:
+    ports:
+      - "80:80"
+
+  backend:
+    restart: unless-stopped
+
+  db:
+    restart: unless-stopped

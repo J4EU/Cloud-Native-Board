@@ -1,0 +1,17 @@
+my_house_ip  = "203.0.113.10/32"
+my_office_ip = "203.0.113.20/32"
+
+# repo_url    = "https://github.com/J4EU/Cloud-Native-F1-Board"
+# repo_branch = "main"
+
+# 도메인이 아직 없으면 비워두기
+# 비워 두면 user_data가 EC2 public IP를 읽어서 backend FRONTEND_URL에 넣음
+frontend_origin = ""
+
+# frontend nginx가 /api 를 backend로 프록시하므로 상대 경로를 기본값으로 설정
+frontend_api_url = "/api"
+
+db_name          = "f1db"
+db_user          = "f1user"
+mariadb_database = "f1db"
+mariadb_user     = "f1user"

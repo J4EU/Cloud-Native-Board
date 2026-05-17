@@ -1,0 +1,113 @@
+#!/bin/bash
+set -euxo pipefail
+
+# user_data 로그를 남겨서 첫 부팅 실패 시 원인을 추적할 수 있도록 함
+exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+APP_DIR="${app_directory}"
+REPO_URL="${repo_url}"
+REPO_BRANCH="${repo_branch}"
+FRONTEND_API_URL="${frontend_api_url}"
+FRONTEND_ORIGIN="${frontend_origin}"
+DOCKER_BUILDX_VERSION="${docker_buildx_version}"
+
+# Amazon Linux 2023 기본 패키지 설치
+dnf update -y
+dnf install -y docker git
+
+systemctl enable --now docker
+
+# 이후 SSH 접속부터는 ec2-user도 docker 명령을 쓸 수 있게 그룹을 추가
+usermod -aG docker ec2-user
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+
+ARCH="$(uname -m)"
+case "${ARCH}" in
+  aarch64)
+    COMPOSE_ARCH="aarch64"
+    BUILDX_ARCH="arm64"
+    ;;
+  x86_64)
+    COMPOSE_ARCH="x86_64"
+    BUILDX_ARCH="amd64"
+    ;;
+  *)
+    echo "Unsupported architecture: ${ARCH}"
+    exit 1
+    ;;
+esac
+
+# Compose v2는 CLI 플러그인으로 설치
+curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${COMPOSE_ARCH}" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Buildx는 현재 수동 배포에서 사용한 버전으로 고정
+curl -fsSL "https://github.com/docker/buildx/releases/download/${DOCKER_BUILDX_VERSION}/buildx-${DOCKER_BUILDX_VERSION}.linux-${BUILDX_ARCH}" \
+  -o /usr/local/lib/docker/cli-plugins/docker-buildx
+chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+
+mkdir -p "${APP_DIR}"
+chown ec2-user:ec2-user "${APP_DIR}"
+
+if [ ! -d "${APP_DIR}/.git" ]; then
+  runuser -u ec2-user -- git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${APP_DIR}"
+else
+  runuser -u ec2-user -- git -C "${APP_DIR}" fetch origin
+  runuser -u ec2-user -- git -C "${APP_DIR}" checkout "${REPO_BRANCH}"
+  runuser -u ec2-user -- git -C "${APP_DIR}" pull --ff-only origin "${REPO_BRANCH}"
+fi
+
+# public IP가 생긴 뒤에 backend CORS origin을 계산
+if [ -z "${FRONTEND_ORIGIN}" ]; then
+  TOKEN="$(curl -fsSL -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")"
+  PUBLIC_IP="$(curl -fsSL -H "X-aws-ec2-metadata-token: ${TOKEN}" http://169.254.169.254/latest/meta-data/public-ipv4)"
+  FRONTEND_ORIGIN="http://${PUBLIC_IP}"
+fi
+
+{
+  printf '%s\n' '# Docker Compose env'
+  printf '\n'
+  printf '%s\n' '# Backend'
+  printf 'DB_NAME=%s\n' '${db_name}'
+  printf 'DB_USER=%s\n' '${db_user}'
+  printf '%s\n' 'DB_PASSWORD=__MANUALLY_SET_DB_PASSWORD__'
+  printf '%s\n' 'JWT_SECRET=__MANUALLY_SET_JWT_SECRET__'
+  printf '\n'
+  printf '%s\n' '# DB'
+  printf '%s\n' 'MARIADB_ROOT_PASSWORD=__MANUALLY_SET_MARIADB_ROOT_PASSWORD__'
+  printf 'MARIADB_DATABASE=%s\n' '${mariadb_database}'
+  printf 'MARIADB_USER=%s\n' '${mariadb_user}'
+  printf '%s\n' 'MARIADB_PASSWORD=__MANUALLY_SET_MARIADB_PASSWORD__'
+} > "${APP_DIR}/.env"
+
+{
+  printf '%s\n' '# 서버 설정'
+  printf '%s\n' 'PORT=3000'
+  printf 'FRONTEND_URL=%s\n' "${FRONTEND_ORIGIN}"
+  printf '\n'
+  printf '%s\n' '# 데이터베이스 설정'
+  printf '%s\n' 'DB_HOST=db'
+  printf 'DB_USER=%s\n' '${db_user}'
+  printf '%s\n' 'DB_PASSWORD=__MANUALLY_SET_DB_PASSWORD__'
+  printf 'DB_NAME=%s\n' '${db_name}'
+  printf '\n'
+  printf '%s\n' '# 보안 설정'
+  printf '%s\n' 'JWT_SECRET=__MANUALLY_SET_JWT_SECRET__'
+  printf '\n'
+  printf '%s\n' '# 파일 업로드 설정'
+  printf '%s\n' 'USE_S3=false'
+} > "${APP_DIR}/backend/.env"
+
+{
+  printf '%s\n' '# API 설정'
+  printf 'VITE_API_URL=%s\n' "${FRONTEND_API_URL}"
+} > "${APP_DIR}/frontend/.env"
+
+chown ec2-user:ec2-user "${APP_DIR}/.env" "${APP_DIR}/backend/.env" "${APP_DIR}/frontend/.env"
+
+# 설치 검증만 하고, 시크릿 주입과 compose 실행은 수동으로 진행
+docker --version
+docker compose version
+docker buildx version

@@ -97,6 +97,18 @@ resource "aws_instance" "this" {
   key_name        = "f1_board"
   subnet_id       = aws_subnet.this.id
   security_groups = [aws_security_group.this.id]
+  user_data = templatefile("${path.module}/user_data.sh.tftpl", {
+    app_directory         = var.app_directory
+    repo_url              = var.repo_url
+    repo_branch           = var.repo_branch
+    frontend_origin       = var.frontend_origin
+    frontend_api_url      = var.frontend_api_url
+    db_name               = var.db_name
+    db_user               = var.db_user
+    mariadb_database      = var.mariadb_database
+    mariadb_user          = var.mariadb_user
+    docker_buildx_version = var.docker_buildx_version
+  })
 
   tags = {
     Name = "f1_board"

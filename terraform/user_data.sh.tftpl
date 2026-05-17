@@ -23,7 +23,7 @@ usermod -aG docker ec2-user
 mkdir -p /usr/local/lib/docker/cli-plugins
 
 ARCH="$(uname -m)"
-case "${ARCH}" in
+case "$${ARCH}" in
   aarch64)
     COMPOSE_ARCH="aarch64"
     BUILDX_ARCH="arm64"
@@ -33,37 +33,37 @@ case "${ARCH}" in
     BUILDX_ARCH="amd64"
     ;;
   *)
-    echo "Unsupported architecture: ${ARCH}"
+    echo "Unsupported architecture: $${ARCH}"
     exit 1
     ;;
 esac
 
 # Compose v2는 CLI 플러그인으로 설치
-curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${COMPOSE_ARCH}" \
+curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$${COMPOSE_ARCH}" \
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 # Buildx는 현재 수동 배포에서 사용한 버전으로 고정
-curl -fsSL "https://github.com/docker/buildx/releases/download/${DOCKER_BUILDX_VERSION}/buildx-${DOCKER_BUILDX_VERSION}.linux-${BUILDX_ARCH}" \
+curl -fsSL "https://github.com/docker/buildx/releases/download/$${DOCKER_BUILDX_VERSION}/buildx-$${DOCKER_BUILDX_VERSION}.linux-$${BUILDX_ARCH}" \
   -o /usr/local/lib/docker/cli-plugins/docker-buildx
 chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
 
-mkdir -p "${APP_DIR}"
-chown ec2-user:ec2-user "${APP_DIR}"
+mkdir -p "$${APP_DIR}"
+chown ec2-user:ec2-user "$${APP_DIR}"
 
-if [ ! -d "${APP_DIR}/.git" ]; then
-  runuser -u ec2-user -- git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${APP_DIR}"
+if [ ! -d "$${APP_DIR}/.git" ]; then
+  runuser -u ec2-user -- git clone --branch "$${REPO_BRANCH}" "$${REPO_URL}" "$${APP_DIR}"
 else
-  runuser -u ec2-user -- git -C "${APP_DIR}" fetch origin
-  runuser -u ec2-user -- git -C "${APP_DIR}" checkout "${REPO_BRANCH}"
-  runuser -u ec2-user -- git -C "${APP_DIR}" pull --ff-only origin "${REPO_BRANCH}"
+  runuser -u ec2-user -- git -C "$${APP_DIR}" fetch origin
+  runuser -u ec2-user -- git -C "$${APP_DIR}" checkout "$${REPO_BRANCH}"
+  runuser -u ec2-user -- git -C "$${APP_DIR}" pull --ff-only origin "$${REPO_BRANCH}"
 fi
 
 # public IP가 생긴 뒤에 backend CORS origin을 계산
-if [ -z "${FRONTEND_ORIGIN}" ]; then
+if [ -z "$${FRONTEND_ORIGIN}" ]; then
   TOKEN="$(curl -fsSL -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")"
-  PUBLIC_IP="$(curl -fsSL -H "X-aws-ec2-metadata-token: ${TOKEN}" http://169.254.169.254/latest/meta-data/public-ipv4)"
-  FRONTEND_ORIGIN="http://${PUBLIC_IP}"
+  PUBLIC_IP="$(curl -fsSL -H "X-aws-ec2-metadata-token: $${TOKEN}" http://169.254.169.254/latest/meta-data/public-ipv4)"
+  FRONTEND_ORIGIN="http://$${PUBLIC_IP}"
 fi
 
 {
@@ -80,12 +80,12 @@ fi
   printf 'MARIADB_DATABASE=%s\n' '${mariadb_database}'
   printf 'MARIADB_USER=%s\n' '${mariadb_user}'
   printf '%s\n' 'MARIADB_PASSWORD=__MANUALLY_SET_MARIADB_PASSWORD__'
-} > "${APP_DIR}/.env"
+} > "$${APP_DIR}/.env"
 
 {
   printf '%s\n' '# 서버 설정'
   printf '%s\n' 'PORT=3000'
-  printf 'FRONTEND_URL=%s\n' "${FRONTEND_ORIGIN}"
+  printf 'FRONTEND_URL=%s\n' "$${FRONTEND_ORIGIN}"
   printf '\n'
   printf '%s\n' '# 데이터베이스 설정'
   printf '%s\n' 'DB_HOST=db'
@@ -98,14 +98,14 @@ fi
   printf '\n'
   printf '%s\n' '# 파일 업로드 설정'
   printf '%s\n' 'USE_S3=false'
-} > "${APP_DIR}/backend/.env"
+} > "$${APP_DIR}/backend/.env"
 
 {
   printf '%s\n' '# API 설정'
-  printf 'VITE_API_URL=%s\n' "${FRONTEND_API_URL}"
-} > "${APP_DIR}/frontend/.env"
+  printf 'VITE_API_URL=%s\n' "$${FRONTEND_API_URL}"
+} > "$${APP_DIR}/frontend/.env"
 
-chown ec2-user:ec2-user "${APP_DIR}/.env" "${APP_DIR}/backend/.env" "${APP_DIR}/frontend/.env"
+chown ec2-user:ec2-user "$${APP_DIR}/.env" "$${APP_DIR}/backend/.env" "$${APP_DIR}/frontend/.env"
 
 # 설치 검증만 하고, 시크릿 주입과 compose 실행은 수동으로 진행
 docker --version

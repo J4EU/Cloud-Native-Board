@@ -114,3 +114,7 @@ resource "aws_instance" "this" {
     Name = "f1_board"
   }
 }
+
+output "ec2_instance_ip" {
+  value = aws_instance.this.public_ip
+}

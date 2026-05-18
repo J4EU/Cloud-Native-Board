@@ -22,11 +22,14 @@ F1 Board API 서버입니다. Node.js와 Express를 사용하여 구축되었습
    - `.env.example` 파일을 복사하여 `.env` 파일을 만듭니다.
    - DB 정보 및 AWS S3 설정을 입력합니다.
 
-3. **데이터베이스 초기화** (테이블 생성 등)
+3. **데이터베이스 초기화** (로컬 DB를 직접 사용할 때만)
 
    ```bash
    node setup-db.js
    ```
+
+   - Docker Compose 환경에서는 MariaDB 컨테이너가 `db/init.sql`을 최초 1회 실행하여 기본 테이블을 생성합니다.
+   - `setup-db.js`는 컨테이너 없이 로컬 MariaDB/MySQL을 사용할 때만 실행합니다.
 
 4. **서버 실행**
    ```bash

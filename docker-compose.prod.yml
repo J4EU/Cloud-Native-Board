@@ -2,7 +2,7 @@ services:
   frontend:
     ports:
       - "80:80"
-      - restart: inless-stopped
+    restart: unless-stopped
 
   backend:
     restart: unless-stopped
